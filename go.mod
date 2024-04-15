@@ -1,4 +1,4 @@
-module github.com/tdabasinskas/go-backstage/v2
+module github.com/j18e/go-backstage/v2
 
 go 1.22
 
