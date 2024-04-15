@@ -37,11 +37,14 @@ type Client struct {
 
 	// Catalog service to handle communication with the Backstage Catalog API.
 	Catalog *catalogService
+
+	// Token is an optional JWT token for authenticating to the Backstage API.
+	token string
 }
 
 // NewClient returns a new Backstage API client. If a nil httpClient is  provided, a new http.Client will be used.
-// To use API methods which require authentication, provide a http.Client that will perform the authentication.
-func NewClient(baseURL string, defaultNamespace string, httpClient *http.Client) (*Client, error) {
+// To use API methods which require authentication, provide a JWT token which will be passed to Backstage on all requests.
+func NewClient(baseURL string, defaultNamespace string, httpClient *http.Client, token string) (*Client, error) {
 	const apiPath = "/api"
 
 	baseURL = strings.TrimSuffix(baseURL, "/")
@@ -68,6 +71,7 @@ func NewClient(baseURL string, defaultNamespace string, httpClient *http.Client)
 		BaseURL:          baseEndpoint,
 		UserAgent:        userAgent,
 		DefaultNamespace: ns,
+		token:            token,
 	}
 
 	c.Catalog = newCatalogService(c)
@@ -113,6 +117,9 @@ func (c *Client) newRequest(method string, urlStr string, body interface{}) (*ht
 
 	if c.UserAgent != "" {
 		req.Header.Set("User-Agent", c.UserAgent)
+	}
+	if c.token != "" {
+		req.Header.Set("Authorization", "Bearer "+c.token)
 	}
 
 	return req, nil
